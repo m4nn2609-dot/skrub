@@ -674,20 +674,24 @@ def test_column_filters_fail(df_module, filter, expected, match):
     )
     with pytest.raises(expected, match=match):
         TableReport(df, column_filters=filter)
+
+
 def test_n_rows_parameter(df_module):
-    df = df_module.make_dataframe(
-        {"a": list(range(20)), "b": list(range(20))}
-    )
+    def n_shown_rows(report):
+        return sum(
+            len(p.get("rows", ()))
+            for p in report._summary["sample_table"]["parts"]
+            if p["name"] in ("top_slice", "bottom_slice")
+        )
+
+    df = df_module.make_dataframe({"a": list(range(20)), "b": list(range(20))})
 
     report = TableReport(df, verbose=0)
-    parts = {p["name"]: p for p in report._summary["sample_table"]["parts"]}
-    assert len(parts["top_slice"]["rows"]) + len(parts["bottom_slice"]["rows"]) == 10
+    assert n_shown_rows(report) == 10
 
-    report_2 = TableReport(df, n_rows=6, verbose=0)
-    parts_2 = {p["name"]: p for p in report_2._summary["sample_table"]["parts"]}
-    assert len(parts_2["top_slice"]["rows"]) + len(parts_2["bottom_slice"]["rows"]) == 6
+    report = TableReport(df, n_rows=6, verbose=0)
+    assert n_shown_rows(report) == 6
 
-    with config_context(table_report_n_rows=6):
-        report_3 = TableReport(df, verbose=0)
-        parts_3 = {p["name"]: p for p in report_3._summary["sample_table"]["parts"]}
-        assert len(parts_3["top_slice"]["rows"]) + len(parts_3["bottom_slice"]["rows"]) == 6
+    with config_context(table_report_n_rows=7):
+        report = TableReport(df, verbose=0)
+        assert n_shown_rows(report) == 7
