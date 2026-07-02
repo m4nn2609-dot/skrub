@@ -695,3 +695,8 @@ def test_n_rows_parameter(df_module):
     with config_context(table_report_n_rows=7):
         report = TableReport(df, verbose=0)
         assert n_shown_rows(report) == 7
+
+
+def test_table_report_dict(air_quality):
+    report = TableReport(air_quality)
+    assert report.dict() == json.loads(report.json())

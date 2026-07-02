@@ -15,6 +15,8 @@ New Features
   ``table_report_n_rows`` parameter to globally control the default number of
   rows displayed in :class:`TableReport`.
   :pr:`2193` by :user:`Mann <m4nn2609-dot>`.
+- :meth:`TableReport.dict` now allows exporting the report data as a Python
+  dictionary. :pr:`2188` by :user:`m4nn2609-dot <m4nn2609-dot>`.
 - New methods :meth:`SkrubLearner.get_named_params` and
   :meth:`SkrubLearner.set_named_params` allow getting and setting the outcomes for
   choices contained in the DataOp, keyed by choice name. It provides a more
@@ -35,6 +37,15 @@ New Features
   :meth:`DataOp.skb.eval`, :meth:`SkrubLearner.predict`, etc., or in
   :meth:`DataOp.skb.find` or :meth:`SkrubLearner.truncated_after`. :pr:`2062` by
   :user:`Jérôme Dockès <jeromedockes>`.
+- The :class:`SessionEncoder` is now available. This encoder adds a `session_id`
+  column, which groups together events that occur within the given session gap.
+  Additionally, it is possible to provide a ``split_by`` column or list of columns
+  (e.g., user ID or (user ID, user device)) to compute sessions for each grouping
+  value.
+  :pr:`1930` by  :user:`Riccardo Cappuzzo <rcap107>`.
+-  A new synthetic dataset generator for timestamped data and session-based
+  operations has been added: :meth:`~skrub.datasets.make_retail_events`.
+  :pr:`1930` by  :user:`Riccardo Cappuzzo <rcap107>`.
 - The :class:`DropSimilar` transformer has been added, for removing columns in a
   dataframe that present high correlation with other columns. :pr:`2023` by
   :user:`Eloi Massoulié <emassoulie>`.
@@ -69,6 +80,19 @@ Changes
   :pr:`2048` by :user:`Riccardo Cappuzzo <rcap107>`.
 - The minimum required version of matplotlib has been increased from 3.4.3 to 3.6.1.
   :pr:`2159` by :user:`Riccardo Cappuzzo <rcap107>`.
+- :meth:`SkrubLearner.score` has been enhanced when the DataOp used
+  :meth:`DataOp.skb.with_scoring`. During scoring, predict(), predict_proba()
+  etc. are cached to avoid recomputation when multiple scorers are used (or one
+  scorer calls them several times). Moreover it is possible to pass
+  ``return_predictions=True`` to also retrieve any predictions that have been
+  computed during scoring, in addition to the scores. Finally, in cases where we
+  already have the predictions but want the result of score() without
+  recomputing them, it is possible to provide them in the environment passed to
+  ``score({..., "_skrub_predictions": {"predict_proba": ...}})``.
+  :pr:`2195` by :user:`Jérôme Dockès <jeromedockes>`.
+- :meth:`SkrubLearner.find_fitted_estimator` now supports searching for the
+  apply node by ID or callable predicate as alternatives to the node name.
+  :pr:`2194` by :user:`Jérôme Dockès <jeromedockes>`.
 
 Bugfixes
 --------
@@ -90,6 +114,10 @@ Bugfixes
 - An error that happened when running ``TableReport`` or ``column_associations``
   on some dataframes with non-string column names has been fixed in :pr:`2179`
   by :user:`Jérôme Dockès <jeromedockes>`.
+- An error that could arise in histograms when running :class:`TableReport` on
+  data with a very small range (less than 10 representable floating-point
+  numbers between min and max) has been fixed.
+  :pr:`2189` by :user:`Jérôme Dockès <jeromedockes>`.
 
 Deprecations
 ------------
